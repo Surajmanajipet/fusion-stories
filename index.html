@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Blog</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="1" fill="white" opacity="0.1"/></svg>');
+        pointer-events: none;
+    }
+
+    /* Navbar */
+    .navbar {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 20px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .brand {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .brand-icon {
+        font-size: 2rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .create-btn {
+        background: white;
+        color: #667eea;
+        padding: 12px 28px;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        background: #f8f9ff;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 50px 30px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Grid */
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Post card */
+    .post-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .post-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .post-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .post-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .post-content-wrapper {
+        min-height: 120px;
+        margin-bottom: 20px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 12px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .date {
+        font-size: 0.9rem;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .date::before {
+        content: '📅';
+        font-size: 0.85rem;
+    }
+
+    /* Buttons */
+    .card-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .card-buttons .btn {
+        flex: 1;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .edit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .delete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    }
+
+    .empty {
+        text-align: center;
+        color: white;
+        font-size: 1.3rem;
+        margin-top: 100px;
+        opacity: 0.9;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        display: block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    /* Modal */
+    #postModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+        background: white;
+        margin: 80px auto;
+        padding: 40px;
+        width: 90%;
+        max-width: 600px;
+        border-radius: 24px;
+        box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-content h2 {
+        font-size: 1.8rem;
+        color: #2d3748;
+        margin-bottom: 30px;
+        font-weight: 700;
+    }
+
+    #postModal input,
+    #postModal textarea {
+        width: 100%;
+        padding: 16px 20px;
+        margin: 12px 0;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: #f7fafc;
+    }
+
+    #postModal input:focus,
+    #postModal textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    #postModal textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .modal-buttons .btn {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .modal-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e0;
+        transform: translateY(-2px);
+    }
+
+    @media(max-width: 768px) {
+        .post-grid { grid-template-columns: 1fr; }
+        .navbar-content { padding: 0 20px; }
+        .container { padding: 30px 20px; }
+        .brand { font-size: 1.5rem; }
+        .modal-content { margin: 40px auto; padding: 30px 25px; }
+    }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <div class="navbar-content">
+        <div class="brand">
+            <span class="brand-icon">✍️</span>
+            <span>My Blog</span>
+        </div>
+        <button class="create-btn" onclick="openModal()">✨ Create Post</button>
+    </div>
+</div>
+
+<!-- Main container -->
+<div class="container">
+    <div id="postsContainer"></div>
+</div>
+
+<!-- Modal -->
+<div id="postModal">
+    <div class="modal-content">
+        <h2 id="modalTitle">Create New Post</h2>
+        <form id="postForm">
+            <input type="text" id="postTitle" placeholder="Enter post title..." required>
+            <textarea id="postContent" placeholder="Write your content here..." required></textarea>
+            <div class="modal-buttons">
+                <button type="submit" class="btn">💾 Save Post</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const API_KEY = "$2a$10$y6OHg5Dbe6XyPtWPyt1ygOTWQUWgXpV7hdTme1Iy3G.sC/uVywnHu";
+const BIN_ID = "690c6102ae596e708f47f30b";
+const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+let posts = [];
+let editingPostId = null;
+
+// Fetch posts
+async function fetchPosts() {
+    try {
+        const res = await fetch(BASE_URL, { headers: { "X-Master-Key": API_KEY } });
+        const data = await res.json();
+        posts = data.record.posts || [];
+        renderPosts();
+    } catch(e){ console.error(e); }
+}
+
+// Render posts
+function renderPosts() {
+    const container = document.getElementById("postsContainer");
+    if (!posts.length) {
+        container.innerHTML = `<div class="empty"><span class="empty-icon">📝</span><p>No posts yet. Create your first post!</p></div>`;
+        return;
+    }
+
+    container.innerHTML = `<div class="post-grid">` + posts.map(p => `
+        <div class="post-card" onclick="viewPost(${p.id})">
+            <div class="post-content-wrapper">
+                <div class="title">${escapeHtml(p.title)}</div>
+                <div class="date">${new Date(p.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            </div>
+            <div class="card-buttons" onclick="event.stopPropagation();">
+                <button class="btn edit-btn" onclick="editPost(${p.id})">✏️ Edit</button>
+                <button class="btn delete-btn" onclick="deletePost(${p.id})">🗑️ Delete</button>
+            </div>
+        </div>
+    `).join("") + `</div>`;
+}
+
+// View post (placeholder for now)
+function viewPost(id) {
+    // Redirect to post.html with the post ID as a query parameter
+    window.location.href = `post.html?id=${id}`;
+}
+
+// Open/Close modal
+function openModal() {
+    document.getElementById("postModal").style.display = "block";
+    document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+    document.getElementById("postModal").style.display = "none";
+    document.body.style.overflow = "auto";
+    document.getElementById("postForm").reset();
+    editingPostId = null;
+    document.getElementById("modalTitle").innerText = "Create New Post";
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Save posts
+async function savePosts() {
+    await fetch(BASE_URL, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+        body: JSON.stringify({ posts })
+    });
+    fetchPosts();
+}
+
+// Edit post
+function editPost(id) {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+    editingPostId = id;
+    document.getElementById("postTitle").value = post.title;
+    document.getElementById("postContent").value = post.content;
+    document.getElementById("modalTitle").innerText = "Edit Post";
+    openModal();
+}
+
+// Delete post
+function deletePost(id) {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+    posts = posts.filter(p => p.id !== id);
+    savePosts();
+}
+
+// Form submit
+document.getElementById("postForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = document.getElementById("postTitle").value;
+    const content = document.getElementById("postContent").value;
+
+    if (editingPostId) {
+        const index = posts.findIndex(p => p.id === editingPostId);
+        posts[index].title = title;
+        posts[index].content = content;
+        posts[index].date = new Date().toISOString();
+    } else {
+        const newPost = { id: Date.now(), title, content, date: new Date().toISOString() };
+        posts.unshift(newPost);
+    }
+
+    savePosts();
+    closeModal();
+});
+
+// Close modal on outside click
+document.getElementById("postModal").addEventListener("click", e => {
+    if (e.target.id === "postModal") closeModal();
+});
+
+// Initial fetch
+fetchPosts();
+</script>
+</body>
+</html>
